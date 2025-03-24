@@ -11,7 +11,7 @@ const pool = new Pool({
 });
 
 // ✅ SECRET KEY for JWT
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+const JWT_SECRET = process.env.JWT_SECRET || "7c3098568f564fe078638700748c7a02d33ee0ff3c49eebf55e8fddf9b659b73c76879b1d1de81fada4bf80ebf62a012ade67ce3cb9ba218a2abb8b88af44655";
 
 // ✅ Register a New User
 router.post("/register",
