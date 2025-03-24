@@ -1,16 +1,28 @@
 {
   "name": "backend-marketplace",
   "version": "1.0.0",
+  "description": "Marketplace Backend with Depop-style API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'Skipping build step, not required for backend'"
+    "dev": "nodemon server.js",
+    "build": "echo 'Skipping build step, not required for backend'",
+    "deploy": "npm install && npm start"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.0.1",
-    "express": "^4.17.1",
-    "multer": "^1.4.5-lts.2",
-    "pg": "^8.7.1"
-  }
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "multer": "^1.4.4",
+    "pg": "^8.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": ["marketplace", "depop", "ecommerce", "backend"],
+  "author": "Your Name",
+  "license": "MIT"
 }

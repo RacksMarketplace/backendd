@@ -10,7 +10,24 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-// ✅ GET /products - Fetch all products (With Pagination & Filters)
+// ✅ Ensure Upload Directory Exists
+const uploadDir = path.join(__dirname, "../uploads");
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// ✅ Set Up Multer for Image Uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
+
+// ✅ GET /products - Fetch All Products (With Pagination & Search)
 router.get("/", async (req, res) => {
     try {
         const { page = 1, limit = 10, search = "" } = req.query;
@@ -26,21 +43,6 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-// ✅ Set Up Multer for Image Uploads
-const uploadDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-const upload = multer({ storage });
 
 // ✅ POST /products - Add New Product with Image Upload
 router.post("/", upload.single("image"), async (req, res) => {
@@ -66,7 +68,7 @@ router.post("/", upload.single("image"), async (req, res) => {
     }
 });
 
-// ✅ PUT /products/:id - Update a product
+// ✅ PUT /products/:id - Update a Product
 router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const { name, price, description, category, image_url } = req.body;
@@ -87,7 +89,7 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-// ✅ DELETE /products/:id - Soft delete a product
+// ✅ DELETE /products/:id - Soft Delete a Product
 router.delete("/:id", async (req, res) => {
     const { id } = req.params;
 
