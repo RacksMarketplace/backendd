@@ -109,4 +109,49 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
+const { authenticateToken } = require("./auth");
+
+// ✅ Secure POST (Only logged-in users can add a product)
+router.post("/", authenticateToken, upload.single("image"), async (req, res) => {
+    const { name, price, description, category } = req.body;
+    const user_id = req.user.userId; // Extract user ID from token
+    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!name || !price || !description) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        const result = await pool.query(
+            "INSERT INTO products (user_id, name, price, description, category, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [user_id, name, price, description, category || "Other", image_url]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error("Error adding product:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ✅ Secure DELETE (Only product owner can delete)
+router.delete("/:id", authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const user_id = req.user.userId;
+
+    try {
+        const result = await pool.query("SELECT user_id FROM products WHERE id = $1", [id]);
+        if (result.rowCount === 0) return res.status(404).json({ error: "Product not found" });
+
+        if (result.rows[0].user_id !== user_id) {
+            return res.status(403).json({ error: "Unauthorized to delete this product" });
+        }
+
+        await pool.query("UPDATE products SET deleted_at = NOW() WHERE id = $1", [id]);
+        res.json({ message: "Product deleted successfully" });
+    } catch (err) {
+        console.error("Error deleting product:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
