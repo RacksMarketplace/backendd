@@ -7,6 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const productRoutes = require("./routes/products");  // Import products route
+app.use("/products", productRoutes);  // Use the /products route
+
+
 // ✅ Connect to PostgreSQL Database
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
