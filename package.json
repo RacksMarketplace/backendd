@@ -7,30 +7,33 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build": "echo 'Skipping build step, not required for backend'",
-    "deploy": "npm install && npm start"
+    "deploy": "npm install && npm start",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
+    "test": "jest --coverage",
+    "db:migrate": "node migrations/migrate.js",
+    "db:reset": "node migrations/reset.js",
+    "logs": "tail -f logs/backend.log"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-validator": "^7.2.1",
-    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.4",
-    "pg": "^8.10.0"
+    "pg": "^8.10.0",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "eslint": "^8.35.0",
+    "prettier": "^3.2.4",
+    "jest": "^29.6.1",
+    "supertest": "^6.3.3"
   },
   "engines": {
     "node": ">=16"
   },
-  "keywords": [
-    "marketplace",
-    "depop",
-    "ecommerce",
-    "backend"
-  ],
-  "author": "Your Name",
+  "keywords": ["marketplace", "depop", "ecommerce", "backend"],
+  "author": "Musa Madut",
   "license": "MIT"
 }
