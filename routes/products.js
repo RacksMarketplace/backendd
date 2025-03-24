@@ -27,16 +27,45 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ GET /products - Fetch All Products (With Pagination & Search)
+// ✅ GET /products - Fetch products with search, filter, and sort options
 router.get("/", async (req, res) => {
-    try {
-        const { page = 1, limit = 10, search = "" } = req.query;
-        const offset = (page - 1) * limit;
+    const { search, category, minPrice, maxPrice, sort } = req.query;
 
-        const result = await pool.query(
-            "SELECT * FROM products WHERE deleted_at IS NULL AND (name ILIKE $1 OR description ILIKE $1) ORDER BY created_at DESC LIMIT $2 OFFSET $3",
-            [`%${search}%`, limit, offset]
-        );
+    let query = "SELECT * FROM products WHERE deleted_at IS NULL";
+    let params = [];
+
+    if (search) {
+        query += ` AND name ILIKE $${params.length + 1}`;
+        params.push(`%${search}%`);
+    }
+
+    if (category) {
+        query += ` AND category = $${params.length + 1}`;
+        params.push(category);
+    }
+
+    if (minPrice) {
+        query += ` AND price >= $${params.length + 1}`;
+        params.push(minPrice);
+    }
+
+    if (maxPrice) {
+        query += ` AND price <= $${params.length + 1}`;
+        params.push(maxPrice);
+    }
+
+    if (sort) {
+        if (sort === "newest") {
+            query += " ORDER BY created_at DESC";
+        } else if (sort === "price_low") {
+            query += " ORDER BY price ASC";
+        } else if (sort === "price_high") {
+            query += " ORDER BY price DESC";
+        }
+    }
+
+    try {
+        const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (err) {
         console.error("Error fetching products:", err);
