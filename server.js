@@ -2,45 +2,38 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const authRoutes = require("./routes/auth");
-app.use("/auth", authRoutes.router);
-
-
-const productRoutes = require("./routes/products"); // ✅ Must match correct file path
-app.use("/products", productRoutes);
-
-
-
-// ✅ Connect to PostgreSQL Database
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }  // Required for Render PostgreSQL
+    ssl: { rejectUnauthorized: false }
 });
 
-// ✅ Test database connection
-pool.query("SELECT NOW()", (err, res) => {
-    if (err) {
-        console.error("❌ Database connection error:", err);
-    } else {
-        console.log("✅ Connected to PostgreSQL at:", res.rows[0].now);
-    }
-});
+// Middleware to verify JWT
+const verifyToken = (req, res, next) => {
+    const token = req.headers["authorization"];
+    if (!token) return res.status(403).json({ message: "No token provided" });
 
-// ✅ Test API route
-app.get("/test-db", async (req, res) => {
+    jwt.verify(token.split(" ")[1], process.env.JWT_SECRET, (err, decoded) => {
+        if (err) return res.status(401).json({ message: "Unauthorized" });
+        req.userId = decoded.id;
+        next();
+    });
+};
+
+// Get all products
+app.get("/products", async (req, res) => {
     try {
-        const result = await pool.query("SELECT NOW()");
-        res.json({ message: "Database connected", time: result.rows[0] });
+        const result = await pool.query("SELECT * FROM products");
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ✅ Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
