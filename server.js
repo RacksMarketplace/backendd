@@ -7,8 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const productRoutes = require("./routes/products");  // Import products route
-app.use("/products", productRoutes);  // Use the /products route
+const productRoutes = require("./routes/products"); // ✅ Must match correct file path
+app.use("/products", productRoutes);
+
 
 
 // ✅ Connect to PostgreSQL Database
